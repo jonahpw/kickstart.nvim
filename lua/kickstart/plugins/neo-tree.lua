@@ -14,6 +14,7 @@ return {
     { '\\', ':Neotree reveal<CR>', desc = 'NeoTree reveal', silent = true },
   },
   opts = {
+    open_files_do_not_replace_types = { 'terminal', 'trouble', 'qf' },
     filesystem = {
       window = {
         mappings = {
