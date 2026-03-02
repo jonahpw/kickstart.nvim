@@ -3,20 +3,14 @@ return {
   dependencies = { 'folke/snacks.nvim' },
   opts = {
     terminal = {
-      split_side = 'right',
-      snacks_win_opts = {
-        position = 'bottom',
-        height = 0.30,
-        relative = 'editor',
-      },
+      provider = 'none',
     },
     diff_opts = {
-      keep_terminal_focus = true,
+      keep_terminal_focus = false,
     },
   },
+  lazy = false,
   keys = {
-    { '<leader>ac', '<cmd>ClaudeCode<cr>', desc = 'Toggle Claude' },
-    { '<leader>af', '<cmd>ClaudeCodeFocus<cr>', desc = 'Focus Claude' },
     { '<leader>as', '<cmd>ClaudeCodeSend<cr>', mode = 'v', desc = 'Send to Claude' },
   },
 }
