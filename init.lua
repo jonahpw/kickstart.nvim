@@ -185,11 +185,6 @@ vim.o.scrolloff = 10
 -- See `:help 'confirm'`
 vim.o.confirm = true
 
--- Auto-reload files changed outside of Neovim (e.g. git checkout from a tmux pane).
--- The fixed socket lets git hooks send `:checktime` via `nvim --server`.
-vim.o.autoread = true
-vim.fn.serverstart '/tmp/nvim-main.sock'
-
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
