@@ -210,6 +210,32 @@ vim.diagnostic.config {
 
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
+-- Jump to previous line with less indent
+vim.keymap.set('n', '[i', function()
+  local row = vim.fn.line('.')
+  local cur_indent = vim.fn.indent(row)
+  for lnum = row - 1, 1, -1 do
+    local line = vim.fn.getline(lnum)
+    if line:match('%S') and vim.fn.indent(lnum) < cur_indent then
+      vim.cmd(tostring(lnum))
+      return
+    end
+  end
+end, { desc = 'Jump to previous line with less indent' })
+
+-- Jump to previous line with same indent
+vim.keymap.set('n', '[=', function()
+  local row = vim.fn.line('.')
+  local cur_indent = vim.fn.indent(row)
+  for lnum = row - 1, 1, -1 do
+    local line = vim.fn.getline(lnum)
+    if line:match('%S') and vim.fn.indent(lnum) == cur_indent then
+      vim.cmd(tostring(lnum))
+      return
+    end
+  end
+end, { desc = 'Jump to previous line with same indent' })
+
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
