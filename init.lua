@@ -185,6 +185,11 @@ vim.o.scrolloff = 10
 -- See `:help 'confirm'`
 vim.o.confirm = true
 
+-- Auto-reload files changed outside of Neovim (e.g. git checkout from a tmux pane).
+-- The fixed socket lets git hooks send `:checktime` via `nvim --server`.
+vim.o.autoread = true
+vim.fn.serverstart '/tmp/nvim-main.sock'
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -429,6 +434,9 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader>sc', builtin.commands, { desc = '[S]earch [C]ommands' })
+      vim.keymap.set('n', '<leader>sa', function()
+        builtin.find_files { no_ignore = true, hidden = true, file_ignore_patterns = { 'node_modules/', '__pycache__/', '%.git/' } }
+      end, { desc = '[S]earch [A]ll files (incl. gitignored)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
 
       -- This runs on LSP attach per buffer (see main LSP attach function in 'neovim/nvim-lspconfig' config for more info,
