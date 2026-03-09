@@ -261,6 +261,7 @@ vim.keymap.set('n', ']<Tab>', function()
   end
 end, { desc = 'Jump to next line with same indent' })
 
+
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
@@ -888,6 +889,8 @@ require('lazy').setup({
     priority = 1000,
     init = function()
       vim.cmd.colorscheme 'melange'
+      vim.api.nvim_set_hl(0, 'Normal', { bg = '#191715' })
+      vim.api.nvim_set_hl(0, 'NormalFloat', { bg = '#191715' })
     end,
   },
 
