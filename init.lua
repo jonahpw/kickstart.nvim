@@ -101,7 +101,7 @@ vim.g.have_nerd_font = true
 -- Tabline: show parent/filename.ext
 function _G.custom_tabline()
   local s = ''
-  for i = 1, vim.fn.tabpagenr('$') do
+  for i = 1, vim.fn.tabpagenr '$' do
     local ok, diff_label = pcall(vim.api.nvim_tabpage_get_var, vim.api.nvim_list_tabpages()[i], 'diff_label')
     local label
     if ok and diff_label then
@@ -122,8 +122,7 @@ vim.o.tabline = '%!v:lua.custom_tabline()'
 -- Make line numbers default
 vim.o.number = true
 -- You can also add relative line numbers, to help with jumping.
---  Experiment for yourself to see if you like it!
--- vim.o.relativenumber = true
+vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
@@ -208,15 +207,18 @@ vim.diagnostic.config {
   jump = { float = true },
 }
 
+-- Add borders to all floating windows (LSP hover, signature help, etc.)
+vim.o.winborder = 'rounded'
+
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 -- Indent-based jump keymaps
 vim.keymap.set('n', '[i', function()
-  local row = vim.fn.line('.')
+  local row = vim.fn.line '.'
   local cur_indent = vim.fn.indent(row)
   for lnum = row - 1, 1, -1 do
     local line = vim.fn.getline(lnum)
-    if line:match('%S') and vim.fn.indent(lnum) < cur_indent then
+    if line:match '%S' and vim.fn.indent(lnum) < cur_indent then
       vim.cmd(tostring(lnum))
       return
     end
@@ -224,12 +226,12 @@ vim.keymap.set('n', '[i', function()
 end, { desc = 'Jump to previous line with less indent' })
 
 vim.keymap.set('n', ']i', function()
-  local row = vim.fn.line('.')
-  local last = vim.fn.line('$')
+  local row = vim.fn.line '.'
+  local last = vim.fn.line '$'
   local cur_indent = vim.fn.indent(row)
   for lnum = row + 1, last do
     local line = vim.fn.getline(lnum)
-    if line:match('%S') and vim.fn.indent(lnum) < cur_indent then
+    if line:match '%S' and vim.fn.indent(lnum) < cur_indent then
       vim.cmd(tostring(lnum))
       return
     end
@@ -237,11 +239,11 @@ vim.keymap.set('n', ']i', function()
 end, { desc = 'Jump to next line with less indent' })
 
 vim.keymap.set('n', '[<Tab>', function()
-  local row = vim.fn.line('.')
+  local row = vim.fn.line '.'
   local cur_indent = vim.fn.indent(row)
   for lnum = row - 1, 1, -1 do
     local line = vim.fn.getline(lnum)
-    if line:match('%S') and vim.fn.indent(lnum) == cur_indent then
+    if line:match '%S' and vim.fn.indent(lnum) == cur_indent then
       vim.cmd(tostring(lnum))
       return
     end
@@ -249,18 +251,17 @@ vim.keymap.set('n', '[<Tab>', function()
 end, { desc = 'Jump to previous line with same indent' })
 
 vim.keymap.set('n', ']<Tab>', function()
-  local row = vim.fn.line('.')
-  local last = vim.fn.line('$')
+  local row = vim.fn.line '.'
+  local last = vim.fn.line '$'
   local cur_indent = vim.fn.indent(row)
   for lnum = row + 1, last do
     local line = vim.fn.getline(lnum)
-    if line:match('%S') and vim.fn.indent(lnum) == cur_indent then
+    if line:match '%S' and vim.fn.indent(lnum) == cur_indent then
       vim.cmd(tostring(lnum))
       return
     end
   end
 end, { desc = 'Jump to next line with same indent' })
-
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -481,9 +482,12 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader>sc', builtin.commands, { desc = '[S]earch [C]ommands' })
-      vim.keymap.set('n', '<leader>sa', function()
-        builtin.find_files { no_ignore = true, hidden = true, file_ignore_patterns = { 'node_modules/', '__pycache__/', '%.git/' } }
-      end, { desc = '[S]earch [A]ll files (incl. gitignored)' })
+      vim.keymap.set(
+        'n',
+        '<leader>sa',
+        function() builtin.find_files { no_ignore = true, hidden = true, file_ignore_patterns = { 'node_modules/', '__pycache__/', '%.git/' } } end,
+        { desc = '[S]earch [A]ll files (incl. gitignored)' }
+      )
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
 
       -- This runs on LSP attach per buffer (see main LSP attach function in 'neovim/nvim-lspconfig' config for more info,
@@ -937,15 +941,32 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     config = function()
-      local filetypes = { 'bash', 'c', 'css', 'diff', 'html', 'javascript', 'json', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'python', 'query', 'tsx', 'typescript', 'vim', 'vimdoc', 'yaml' }
+      local filetypes = {
+        'bash',
+        'c',
+        'css',
+        'diff',
+        'html',
+        'javascript',
+        'json',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'python',
+        'query',
+        'tsx',
+        'typescript',
+        'vim',
+        'vimdoc',
+        'yaml',
+      }
       require('nvim-treesitter').install(filetypes)
       vim.api.nvim_create_autocmd('FileType', {
         pattern = filetypes,
         callback = function(args)
           local lang = vim.treesitter.language.get_lang(args.match) or args.match
-          if pcall(vim.treesitter.language.inspect, lang) then
-            vim.treesitter.start(args.buf, lang)
-          end
+          if pcall(vim.treesitter.language.inspect, lang) then vim.treesitter.start(args.buf, lang) end
         end,
       })
     end,
