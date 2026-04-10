@@ -455,12 +455,18 @@ require('lazy').setup({
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
-        -- pickers = {}
+        defaults = {
+          mappings = {
+            i = {
+              ['<c-enter>'] = 'to_fuzzy_refine',
+              ['<c-y>'] = function(prompt_bufnr)
+                local entry = require('telescope.actions.state').get_selected_entry()
+                vim.fn.setreg('+', entry.path or entry.filename or entry.value)
+                require('telescope.actions').close(prompt_bufnr)
+              end,
+            },
+          },
+        },
         extensions = {
           ['ui-select'] = { require('telescope.themes').get_dropdown() },
         },
@@ -508,6 +514,9 @@ require('lazy').setup({
           -- This is where a variable was first declared, or where a function is defined, etc.
           -- To jump back, press <C-t>.
           vim.keymap.set('n', 'grd', builtin.lsp_definitions, { buffer = buf, desc = '[G]oto [D]efinition' })
+          vim.keymap.set('n', 'grD', function()
+            builtin.lsp_definitions({ jump_type = 'vsplit' })
+          end, { buffer = buf, desc = '[G]oto [D]efinition in vsplit' })
 
           -- Fuzzy find all the symbols in your current document.
           -- Symbols are things like variables, functions, types, etc.
@@ -893,10 +902,23 @@ require('lazy').setup({
     priority = 1000,
     init = function()
       vim.cmd.colorscheme 'melange'
-      vim.api.nvim_set_hl(0, 'Normal', { bg = '#191715' })
-      vim.api.nvim_set_hl(0, 'NormalFloat', { bg = '#191715' })
+      local hl = vim.api.nvim_set_hl
+      hl(0, 'Normal', { bg = '#191715' })
+      hl(0, 'NormalFloat', { bg = '#191715' })
+      hl(0, '@lsp.type.parameter', { italic = true })
+      hl(0, '@lsp.type.function', { link = '@function.call' })
+      hl(0, '@lsp.type.method', { link = '@function.method.call' })
+      hl(0, '@lsp.type.decorator', { link = '@attribute' })
     end,
   },
+
+  -- {
+  --   'rebelot/kanagawa.nvim',
+  --   priority = 1000,
+  --   init = function()
+  --     vim.cmd.colorscheme 'kanagawa-dragon'
+  --   end,
+  -- },
 
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
@@ -924,13 +946,51 @@ require('lazy').setup({
       --  and try some other statusline plugin
       local statusline = require 'mini.statusline'
       -- set use_icons to true if you have a Nerd Font
-      statusline.setup { use_icons = vim.g.have_nerd_font }
+      statusline.setup {
+        use_icons = vim.g.have_nerd_font,
+        content = {
+          active = function()
+            local mode, mode_hl = statusline.section_mode { trunc_width = 120 }
+            local filename = statusline.section_filename { trunc_width = 140 }
+            local git = statusline.section_git { trunc_width = 40 }
+            local diagnostics = statusline.section_diagnostics { trunc_width = 75 }
+            local location = '%2l:%-2v %3p%%'
+            -- Truncate branch only when it would overlap with filename
+            if git and #git > 0 then
+              local fixed_width = #mode + #filename + #(diagnostics or '') + #location + 12 -- padding/separators
+              local available = vim.o.columns - fixed_width
+              if available < #git then
+                local max_len = math.max(8, available)
+                git = git:sub(1, max_len) .. '…'
+              end
+            end
+            return statusline.combine_groups {
+              { hl = mode_hl, strings = { mode } },
+              { hl = 'MiniStatuslineFilename', strings = { filename } },
+              '%=',
+              { hl = 'MiniStatuslineDevinfo', strings = { git, diagnostics } },
+              { hl = mode_hl, strings = { location } },
+            }
+          end,
+        },
+      }
 
-      -- You can configure sections in the statusline by overriding their
-      -- default behavior. For example, here we set the section for
-      -- cursor location to LINE:COLUMN
-      ---@diagnostic disable-next-line: duplicate-set-field
-      statusline.section_location = function() return '%2l:%-2v %3p%%' end
+      -- Session management (auto-saves per directory)
+      require('mini.sessions').setup {
+        autowrite = true, -- save on exit or switching sessions
+      }
+      -- <leader>ss to save, <leader>sl to load (uses cwd name as default)
+      vim.keymap.set('n', '<leader>ws', function()
+        local name = vim.fn.fnamemodify(vim.fn.getcwd(), ':t')
+        MiniSessions.write(name)
+        vim.notify('Session saved: ' .. name)
+      end, { desc = '[W]orkspace [S]ave' })
+      vim.keymap.set('n', '<leader>wl', function()
+        MiniSessions.select('read')
+      end, { desc = '[W]orkspace [L]oad' })
+      vim.keymap.set('n', '<leader>wd', function()
+        MiniSessions.select('delete')
+      end, { desc = '[W]orkspace [D]elete' })
 
       -- ... and there is more!
       --  Check out: https://github.com/nvim-mini/mini.nvim
