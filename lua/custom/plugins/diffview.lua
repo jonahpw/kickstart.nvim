@@ -35,6 +35,11 @@ return {
       desc = 'Toggle uncommitted changes diff',
     },
     {
+      '<leader>gl',
+      function() open_diff('DiffviewOpen -C' .. project_root() .. ' HEAD~1..HEAD', 'diff last commit') end,
+      desc = 'Toggle last commit diff',
+    },
+    {
       '<leader>gh',
       function()
         local file = vim.fn.expand('%:p')
