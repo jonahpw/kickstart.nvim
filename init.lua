@@ -184,6 +184,23 @@ vim.o.scrolloff = 10
 -- See `:help 'confirm'`
 vim.o.confirm = true
 
+-- Auto-reload buffers when files change on disk (e.g. after git checkout)
+vim.o.autoread = true
+vim.api.nvim_create_autocmd({ 'FocusGained', 'BufEnter', 'CursorHold', 'CursorHoldI' }, {
+  pattern = '*',
+  callback = function()
+    if vim.fn.mode() ~= 'c' and vim.fn.getcmdwintype() == '' then
+      vim.cmd('checktime')
+    end
+  end,
+})
+vim.api.nvim_create_autocmd('FileChangedShellPost', {
+  pattern = '*',
+  callback = function()
+    vim.notify('File changed on disk — buffer reloaded', vim.log.levels.INFO)
+  end,
+})
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
