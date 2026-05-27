@@ -998,16 +998,16 @@ require('lazy').setup({
       }
       -- <leader>ss to save, <leader>sl to load (uses cwd name as default)
       vim.keymap.set('n', '<leader>ws', function()
-        local name = vim.fn.fnamemodify(vim.fn.getcwd(), ':t')
-        MiniSessions.write(name)
-        vim.notify('Session saved: ' .. name)
+        local default = vim.fn.fnamemodify(vim.fn.getcwd(), ':t')
+        vim.ui.input({ prompt = 'Session name: ', default = default }, function(name)
+          if name and name ~= '' then
+            MiniSessions.write(name)
+            vim.notify('Session saved: ' .. name)
+          end
+        end)
       end, { desc = '[W]orkspace [S]ave' })
-      vim.keymap.set('n', '<leader>wl', function()
-        MiniSessions.select('read')
-      end, { desc = '[W]orkspace [L]oad' })
-      vim.keymap.set('n', '<leader>wd', function()
-        MiniSessions.select('delete')
-      end, { desc = '[W]orkspace [D]elete' })
+      vim.keymap.set('n', '<leader>wl', function() MiniSessions.select 'read' end, { desc = '[W]orkspace [L]oad' })
+      vim.keymap.set('n', '<leader>wd', function() MiniSessions.select 'delete' end, { desc = '[W]orkspace [D]elete' })
 
       -- ... and there is more!
       --  Check out: https://github.com/nvim-mini/mini.nvim
